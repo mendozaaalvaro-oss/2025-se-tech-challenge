@@ -22,7 +22,7 @@
 
 ### 2. Frictionless & Customizable Login Experience
 
-- Passwordless authentication using magic links/codes and passkeys are enabled for the database connection 
+- Passwordless authentication using codes and passkeys are enabled for the database connection 
 - Self-service password recovery available both via Auth0 Universal Login and in-app
   - Password reset API call [`server-services/auth0API.js#L80-L97`](server-services/auth0API.js#L80-L97)
 - Social connections take only minutes to configure  
