@@ -70,7 +70,7 @@ After updating this file, restart both the frontend and backend servers for the 
 │   │   ├── NavBar.js
 │   │   ├── Orders.js
 │   │   └── Profile.js
-│   ├── services/
+│   ├── services/                     # App logic
 │   │   ├── placeOrder.js
 │   │   ├── refreshTokens.js
 │   │   ├── sendVerificationEmail.js
