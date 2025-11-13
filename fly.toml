@@ -1,0 +1,28 @@
+app = "2025se-tech-challenge"
+primary_region = "iad"
+
+[build]
+
+[[services]]
+  internal_port = 3000
+  protocol = "tcp"
+  processes = ["app"]
+  auto_start_machines = true
+  auto_stop_machines = "off"
+  min_machines_running = 0
+
+  [[services.ports]]
+    port = 3000
+    handlers = ["tls", "http"]
+
+[[services]]
+  internal_port = 3001
+  protocol = "tcp"
+  processes = ["app"]
+  auto_start_machines = true
+  auto_stop_machines = "off"
+  min_machines_running = 0
+
+  [[services.ports]]
+    port = 3001
+    handlers = ["tls", "http"]

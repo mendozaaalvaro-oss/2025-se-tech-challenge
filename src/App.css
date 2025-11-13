@@ -1,0 +1,159 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #F5E9DA;
+}
+
+code {
+  font-family: monospace;
+}
+
+.custom-navbar {
+  background-color: #fa0000;
+  color: white;
+  font-weight: bold;
+}
+
+.custom-navbar .navbar-nav {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+.custom-navbar .nav-item {
+  display: inline-block;
+}
+
+.custom-navbar .btn {
+  background-color: #F5E9DA;
+  border-color: #F5E9DA;
+  color: #fa0000;
+  font-weight: bold;
+  min-width: 100px;
+  margin: 0 0.5rem;
+}
+
+
+.spinner {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color:#F5E9DA;
+  inset: 0;
+}
+
+.spinner img {
+  width: 100px;
+  height: 100px;
+}
+
+footer .logo {
+  height: 40px;
+}
+
+.alert-info {
+  background-color: #fa0000;
+  border-color: #fa0000;
+  color: white;
+  font-weight: bold;
+}
+
+.alert-info a {
+  text-decoration: underline;
+  color: white;
+}
+
+.alert-info .btn {
+  background-color: #F5E9DA; 
+  border-color: #F5E9DA;
+  color: #fa0000;
+  font-weight: bold;
+}
+
+.verification-alert {
+  margin-bottom: 1rem;
+}
+
+.profile-header .btn-primary {
+  background-color: #fa0000;
+  border-color: #fa0000;
+}
+
+.menu-header,
+.menu-subtitle,
+.login-prompt {
+  text-align: center;
+  margin: 3rem 0;
+}
+
+.menu-subtitle {
+  font-size: 1.25rem;
+}
+
+.menu-item-card {
+  height: 100%;
+}
+
+.menu-item-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-item-description {
+  flex-grow: 1;
+}
+
+.menu-item-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.menu-item-price {
+  color: #fa0000;
+  margin-bottom: 0;
+}
+
+.cart-container {
+  padding: 1.5rem;
+  border: 1px solid;
+  border-radius: 0.25rem;
+  background-color: white;
+  position: sticky;
+  top: 20px;
+}
+
+.cart-item {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid;
+}
+
+.cart-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 0.5rem;
+}
+
+.cart-item-quantity {
+  margin-left: 0.5rem;
+}
+
+.cart-total-section {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid;
+}
+
+.cart-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
