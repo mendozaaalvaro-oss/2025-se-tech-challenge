@@ -1,4 +1,4 @@
-app = "2025se-tech-challenge"
+app = "2025-se-tech-challenge"
 primary_region = "iad"
 
 [build]
