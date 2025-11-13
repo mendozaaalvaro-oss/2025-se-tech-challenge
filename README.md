@@ -24,19 +24,18 @@
 
 - Passwordless authentication using codes and passkeys are enabled for the database connection 
 - Self-service password recovery available both via Auth0 Universal Login and in-app
-  - Password reset API call [`server-services/auth0API.js#L80-L97`](server-services/auth0API.js#L80-L97)
+  - In-app password reset request [`server-services/auth0API.js#L80-L97`](server-services/auth0API.js#L80-L97)
 - Social connections take only minutes to configure  
 - Automatically merge passwordless and password accounts using Auth0 Actions
   - Account linking Action [`auth0/Actions/AccountLinking.md`](auth0/Actions/AccountLinking.md)  
 - Brand and customize your login experience for a unified mobile/web experience
 
-### 3. Marketing Team: Enrich Customer Data at Login
+### 3. Enrich Customer Data at Login
 
 - Store customer's order history in `app_metadata` (non-editable by the user)
   - Store orders in `app_metadata` [`server-services/auth0API.js#L52-L63`](server-services/auth0API.js#L52-L63)
 - Inject order history directly into ID tokens
   - Inject `app_metadata` into ID token [`auth0/Actions/AppMDtoCustomClaims.md`](auth0/Actions/AppMDtoCustomClaims.md)  
-- Display user-specific info securely using the ID token rather than server's local storage  
 
 ## Configuration Guide
 
@@ -106,4 +105,4 @@ After updating this file, restart both the frontend and backend servers for the 
 
 ## License
 
-This demo application is for evaluation purposes only.
+This demo application is only for the purpose of this tech challenge
