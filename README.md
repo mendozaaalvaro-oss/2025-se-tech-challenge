@@ -56,7 +56,7 @@ Edit the [src/auth_config.json](src/auth_config.json) file and replace the place
 - `serverAPI`: Backend API URL
 - `appOrigin`: Frontend application URL
 
-After updating this file, restart both the frontend and backend servers for the changes to take effect. Dockerfile is configured to run `yarn start`. 
+After updating this file, start both the frontend and backend servers for the changes to take effect. Dockerfile is configured to run `yarn start`. 
 
 ## Architecture Diagram
 
