@@ -11,10 +11,11 @@ const getManagementAccessToken = async (event, api) => {
     clientSecret: event.secrets.CLIENT_SECRET,
   });
 
-  const { data: { access_token, expires_in } } =
-    await authentication.oauth.clientCredentialsGrant({
-      audience: `https://${event.secrets.DOMAIN}/api/v2/`,
-    });
+  const {
+    data: { access_token, expires_in },
+  } = await authentication.oauth.clientCredentialsGrant({
+    audience: `https://${event.secrets.DOMAIN}/api/v2/`,
+  });
 
   api.cache.set(mgtToken, access_token, { ttl: expires_in });
   return access_token;
@@ -34,6 +35,11 @@ const connections = ['email', 'sms'];
 exports.onExecutePostLogin = async (event, api) => {
   const strategy = event.connection.strategy;
   if (!connections.includes(strategy)) return;
+
+  if (event.user.app_metadata?.pwdless_linked) {
+    console.log('Account linking already completed for this user');
+    return;
+  }
 
   const email = event.user.email;
   if (!email) return;
@@ -67,17 +73,43 @@ exports.onExecutePostLogin = async (event, api) => {
       console.log('No database user found with this email, skipping linking');
       return;
     }
+
     const primaryUserId = primaryUser.user_id;
     const secondaryUserId = event.user.user_id;
     const [provider, secId] = secondaryUserId.split('|');
 
     console.log(`Linking ${secondaryUserId} to ${primaryUserId}`);
     try {
-      await management.users.identities.link(primaryUserId, {provider, user_id: secId});
-      console.log('Successfully linked accounts');
+      const linkResult = await management.users.identities.link(primaryUserId, {
+        provider,
+        user_id: secId
+      });
 
-      api.authentication.setPrimaryUser(primaryUserId);
-      
+      if (linkResult) {
+        console.log('Successfully linked accounts');
+
+        const secondaryOrders = event.user.app_metadata?.orders || [];
+        const primaryOrders = primaryUser.app_metadata?.orders || [];
+
+        console.log('Secondary orders:', secondaryOrders);
+        console.log('Primary orders:', primaryOrders);
+
+        const mergedOrders = [...primaryOrders, ...secondaryOrders];
+        console.log('Merged orders:', mergedOrders);
+
+        const updatedAppMetadata = {
+          pwdless_linked: true,
+          orders: mergedOrders
+        };
+
+        await management.users.update(
+           primaryUserId,
+          { app_metadata: updatedAppMetadata }
+        );
+        
+        api.authentication.setPrimaryUser(primaryUserId);
+      }
+
     } catch (linkError) {
       console.error('Error in link operation:', {
         message: linkError.message,
