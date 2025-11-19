@@ -26,7 +26,7 @@ async function getManagementAPIToken() {
     body: JSON.stringify({
       client_id: authConfig.managementClientId,
       client_secret: authConfig.managementClientSecret,
-      audience: `https://${authConfig.domain}/api/v2/`,
+      audience: `https://${authConfig.canonical_domain}/api/v2/`,
       grant_type: "client_credentials"
     })
   });
