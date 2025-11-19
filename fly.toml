@@ -9,10 +9,10 @@ primary_region = "iad"
   processes = ["app"]
   auto_start_machines = true
   auto_stop_machines = "off"
-  min_machines_running = 0
+  min_machines_running = 1
 
   [[services.ports]]
-    port = 3000
+    port = 443
     handlers = ["tls", "http"]
 
 [[services]]
@@ -21,7 +21,7 @@ primary_region = "iad"
   processes = ["app"]
   auto_start_machines = true
   auto_stop_machines = "off"
-  min_machines_running = 0
+  min_machines_running = 1
 
   [[services.ports]]
     port = 3001
