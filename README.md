@@ -47,7 +47,8 @@ To configure this application with your Auth0 tenant, update the configuration f
 
 Edit the [src/auth_config.json](src/auth_config.json) file and replace the placeholder values with your Auth0 information:
 
-- `domain`: Your Auth0 tenant domain
+- `domain`: Your Auth0 tenant custom domain
+- `canonical_domain`: Your Auth0 tenant canonical domain (needed as the audience for client credential flows)
 - `clientId`: Your Auth0 SPA application client ID
 - `audience`: Your API identifier for your API server
 - `managementClientId`: Auth0 Management API client ID (M2M Application)
