@@ -4,7 +4,7 @@
   "audience": "https://pizza42.api",
   "scope": "openid profile email create:orders offline_access",
   "serverAPI": "https://2025-se-tech-challenge.fly.dev:3001",
-  "appOrigin": "https://2025-se-tech-challenge.fly.dev",
+  "appOrigin": "https://2025-se-tech-challenge.fly.dev:3000",
   "managementClientId": "TWwj76Bchy7cNpGV8kQFxP1rq179lfY3",
   "managementClientSecret": "O2fkHDVqaMhC1qAFkcJZwwjDIz_ugt-sRaXf4AfRVKB81QutqNPzzG0c4M6nyFDU",
   "connection": "Pizza42"
