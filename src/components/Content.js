@@ -1,80 +1,88 @@
-import React, { Component } from "react";
+import { useState, useCallback } from "react";
 import { Row, Col, Card, CardBody, CardTitle, CardText, Button, Alert, Badge, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import contentData from "../utils/pizzas";
 import { sendVerificationEmail } from "../services/sendVerificationEmail";
 import { handlePlaceOrder } from "../services/placeOrder";
 import { refreshTokens } from "../services/refreshTokens";
 
-class Content extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      cart: [],
-      orderSuccess: false,
-      orderError: null,
-      showEmailVerificationModal: false,
-      sendingVerificationEmail: false,
-      verificationEmailSent: false
-    };
-  }
+const Content = (props) => {
+  const [cart, setCart] = useState([]);
+  const [orderSuccess, setOrderSuccess] = useState(false);
+  const [orderError, setOrderError] = useState(null);
+  const [showEmailVerificationModal, setShowEmailVerificationModal] = useState(false);
+  const [sendingVerificationEmail, setSendingVerificationEmail] = useState(false);
+  const [verificationEmailSent, setVerificationEmailSent] = useState(false);
 
-  addToCart = (item) => {
-    const { cart } = this.state;
-    const existingItem = cart.find(cartItem => cartItem.id === item.id);
+  const addToCart = useCallback((item) => {
+    setCart((prevCart) => {
+      const existingItem = prevCart.find(cartItem => cartItem.id === item.id);
 
-    if (existingItem) {
-      this.setState({
-        cart: cart.map(cartItem =>
+      if (existingItem) {
+        return prevCart.map(cartItem =>
           cartItem.id === item.id
             ? { ...cartItem, quantity: cartItem.quantity + 1 }
             : cartItem
-        )
-      });
-    } else {
-      this.setState({
-        cart: [...cart, { ...item, quantity: 1 }]
-      });
-    }
-  };
+        );
+      } else {
+        return [...prevCart, { ...item, quantity: 1 }];
+      }
+    });
+  }, []);
 
-  removeFromCart = (itemId) => {
-    const { cart } = this.state;
-    const existingItem = cart.find(cartItem => cartItem.id === itemId);
+  const removeFromCart = useCallback((itemId) => {
+    setCart((prevCart) => {
+      const existingItem = prevCart.find(cartItem => cartItem.id === itemId);
 
-    if (existingItem.quantity > 1) {
-      this.setState({
-        cart: cart.map(cartItem =>
+      if (existingItem.quantity > 1) {
+        return prevCart.map(cartItem =>
           cartItem.id === itemId
             ? { ...cartItem, quantity: cartItem.quantity - 1 }
             : cartItem
-        )
-      });
-    } else {
-      this.setState({
-        cart: cart.filter(cartItem => cartItem.id !== itemId)
-      });
-    }
-  };
+        );
+      } else {
+        return prevCart.filter(cartItem => cartItem.id !== itemId);
+      }
+    });
+  }, []);
 
-  calculateTotal = () => {
-    const { cart } = this.state;
+  const calculateTotal = useCallback(() => {
     return cart.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2);
-  };
+  }, [cart]);
 
-  handleSendVerificationEmail = async () => {
-    const { auth0 } = this.props;
-    this.setState({ sendingVerificationEmail: true });
+  const handlePlaceOrderInternal = useCallback(async () => {
+    const { auth0, history } = props;
+
+    try {
+      await handlePlaceOrder(auth0, cart, calculateTotal, history);
+      setOrderSuccess(true);
+      setCart([]);
+      setOrderError(null);
+    } catch (err) {
+      if (err.code === "EMAIL_NOT_VERIFIED") {
+        setShowEmailVerificationModal(true);
+        setOrderError(null);
+      } else {
+        setOrderError(err.message || 'Order failed');
+      }
+    }
+  }, [props, cart, calculateTotal]);
+
+  const handleSendVerificationEmail = useCallback(async () => {
+    const { auth0 } = props;
+    setSendingVerificationEmail(true);
 
     try {
       await sendVerificationEmail(auth0);
-      this.setState({ sendingVerificationEmail: false, verificationEmailSent: true });
+      setSendingVerificationEmail(false);
+      setVerificationEmailSent(true);
     } catch (err) {
-      this.setState({ sendingVerificationEmail: false, orderError: 'Failed to send email' });
+      setSendingVerificationEmail(false);
+      setOrderError('Failed to send email');
     }
-  };
+  }, [props]);
 
-  handleRefreshAndRetry = async () => {
-    const { auth0 } = this.props;
+  const handleRefreshAndRetry = useCallback(async () => {
+    const { auth0 } = props;
 
     try {
       const idTokenClaims = await auth0.getIdTokenClaims();
@@ -84,42 +92,23 @@ class Content extends Component {
         await refreshTokens(auth0);
       }
 
-      this.setState({
-        showEmailVerificationModal: false,
-        orderError: null
-      });
+      setShowEmailVerificationModal(false);
+      setOrderError(null);
 
-      await this.handlePlaceOrder();
+      await handlePlaceOrderInternal();
     } catch (error) {
-      this.setState({
-        orderError: "Failed to refresh session. Please try logging out and back in.",
-        showEmailVerificationModal: false
-      });
+      setOrderError("Failed to refresh session. Please try logging out and back in.");
+      setShowEmailVerificationModal(false);
     }
-  };
+  }, [props, handlePlaceOrderInternal]);
 
-  handlePlaceOrder = async () => {
-    const { cart } = this.state;
-    const { auth0, history } = this.props;
+  const closeModal = useCallback(() => {
+    setShowEmailVerificationModal(false);
+    setVerificationEmailSent(false);
+  }, []);
 
-    try {
-      await handlePlaceOrder(auth0, cart, this.calculateTotal, history);
-      this.setState({ orderSuccess: true, cart: [], orderError: null });
-    } catch (err) {
-      if (err.code === "EMAIL_NOT_VERIFIED") {
-        this.setState({ showEmailVerificationModal: true, orderError: null });
-      } else {
-        this.setState({ orderError: err.message || 'Order failed' });
-      }
-    }
-  };
-
-  closeModal = () => {
-    this.setState({ showEmailVerificationModal: false, verificationEmailSent: false });
-  };
-
-  renderLoginPrompt() {
-    const { loginWithRedirect } = this.props.auth0;
+  const renderLoginPrompt = () => {
+    const { loginWithRedirect } = props.auth0;
     return (
       <div className="login-prompt">
         <Alert color="info">
@@ -134,19 +123,17 @@ class Content extends Component {
         </Alert>
       </div>
     );
-  }
+  };
 
-  renderVerificationModal() {
-    const { showEmailVerificationModal, sendingVerificationEmail, verificationEmailSent } = this.state;
-
+  const renderVerificationModal = () => {
     return (
-      <Modal isOpen={showEmailVerificationModal} toggle={this.closeModal}>
-        <ModalHeader toggle={this.closeModal}>Email Verification Required</ModalHeader>
+      <Modal isOpen={showEmailVerificationModal} toggle={closeModal}>
+        <ModalHeader toggle={closeModal}>Email Verification Required</ModalHeader>
         <ModalBody>
           {verificationEmailSent && (
             <Alert color="success" className="verification-alert">
               <strong>Verification email sent!</strong> Please check your inbox and verify your email.
-              After verifying, click "Refresh and Retry" below.
+              After verifying, click "Email Verification Completed" below.
             </Alert>
           )}
           <p>You need to verify your email address before placing an order.</p>
@@ -154,17 +141,17 @@ class Content extends Component {
           <p>If you've already verified your email, click "Email Verification Completed" to update your session.</p>
         </ModalBody>
         <ModalFooter>
-          <Button color="secondary" onClick={this.closeModal}>Cancel</Button>
-          <Button color="info" onClick={this.handleRefreshAndRetry}>Email Verification Completed</Button>
-          <Button color="primary" onClick={this.handleSendVerificationEmail} disabled={sendingVerificationEmail}>
+          <Button color="secondary" onClick={closeModal}>Cancel</Button>
+          <Button color="info" onClick={handleRefreshAndRetry}>Email Verification Completed</Button>
+          <Button color="primary" onClick={handleSendVerificationEmail} disabled={sendingVerificationEmail}>
             {sendingVerificationEmail ? "Sending..." : "Send Verification Email"}
           </Button>
         </ModalFooter>
       </Modal>
     );
-  }
+  };
 
-  renderMenuItem(item) {
+  const renderMenuItem = (item) => {
     return (
       <Col key={item.id} md={6} className="mb-4">
         <Card className="menu-item-card">
@@ -173,7 +160,7 @@ class Content extends Component {
             <CardText className="menu-item-description">{item.description}</CardText>
             <div className="menu-item-footer">
               <h4 className="menu-item-price">${item.price.toFixed(2)}</h4>
-              <Button color="primary" onClick={() => this.addToCart(item)} size="sm">
+              <Button color="primary" onClick={() => addToCart(item)} size="sm">
                 Add to Order
               </Button>
             </div>
@@ -181,11 +168,9 @@ class Content extends Component {
         </Card>
       </Col>
     );
-  }
+  };
 
-  renderCart() {
-    const { cart } = this.state;
-
+  const renderCart = () => {
     return (
       <div className="cart-container">
         <h3>Your Cart</h3>
@@ -193,13 +178,13 @@ class Content extends Component {
           <p className="empty-cart-text">Your cart is empty</p>
         ) : (
           <>
-            {cart.map((item) => this.renderCartItem(item))}
+            {cart.map((item) => renderCartItem(item))}
             <div className="cart-total-section">
               <div className="cart-total-row">
                 <h4>Total:</h4>
-                <h4>${this.calculateTotal()}</h4>
+                <h4>${calculateTotal()}</h4>
               </div>
-              <Button color="success" size="lg" block onClick={this.handlePlaceOrder}>
+              <Button color="success" size="lg" block onClick={handlePlaceOrderInternal}>
                 Place Order
               </Button>
             </div>
@@ -207,9 +192,9 @@ class Content extends Component {
         )}
       </div>
     );
-  }
-  
-   renderCartItem(item) {
+  };
+
+  const renderCartItem = (item) => {
     return (
       <div key={item.id} className="cart-item">
         <div className="cart-item-header">
@@ -217,51 +202,48 @@ class Content extends Component {
             <strong>{item.title}</strong>
             <Badge color="secondary" className="cart-item-quantity">x{item.quantity}</Badge>
           </div>
-          <Button color="danger" size="sm" onClick={() => this.removeFromCart(item.id)}>
+          <Button color="danger" size="sm" onClick={() => removeFromCart(item.id)}>
             Remove
           </Button>
         </div>
         <div className="cart-item-price">${(item.price * item.quantity).toFixed(2)}</div>
       </div>
     );
+  };
+
+  const { isAuthenticated } = props.auth0;
+
+  if (!isAuthenticated) {
+    return renderLoginPrompt();
   }
 
-  render() {
-    const { isAuthenticated } = this.props.auth0;
-    const { orderSuccess, orderError } = this.state;
+  return (
+    <div>
+      <h2 className="menu-header">Our Menu</h2>
+      <p className="menu-subtitle">Choose from our selection of pizzas</p>
 
-    if (!isAuthenticated) {
-      return this.renderLoginPrompt();
-    }
+      {orderSuccess && (
+        <Alert color="success">
+          Order placed successfully! Redirecting to My Orders...
+        </Alert>
+      )}
 
-    return (
-      <div>
-        <h2 className="menu-header">Our Menu</h2>
-        <p className="menu-subtitle">Choose from our selection of pizzas</p>
+      {orderError && (
+        <Alert color="danger" toggle={() => setOrderError(null)}>
+          {orderError}
+        </Alert>
+      )}
 
-        {orderSuccess && (
-          <Alert color="success">
-            Order placed successfully! Redirecting to My Orders...
-          </Alert>
-        )}
+      {renderVerificationModal()}
 
-        {orderError && (
-          <Alert color="danger" toggle={() => this.setState({ orderError: null })}>
-            {orderError}
-          </Alert>
-        )}
-
-        {this.renderVerificationModal()}
-
-        <Row>
-          <Col lg={8}>
-            <Row>{contentData.map((item) => this.renderMenuItem(item))}</Row>
-          </Col>
-          <Col lg={4}>{this.renderCart()}</Col>
-        </Row>
-      </div>
-    );
-  }
-}
+      <Row>
+        <Col lg={8}>
+          <Row>{contentData.map((item) => renderMenuItem(item))}</Row>
+        </Col>
+        <Col lg={4}>{renderCart()}</Col>
+      </Row>
+    </div>
+  );
+};
 
 export { Content };
