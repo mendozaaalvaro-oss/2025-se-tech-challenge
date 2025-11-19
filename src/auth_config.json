@@ -1,5 +1,5 @@
 {
-  "domain": "2025se-tech-challenge.us.auth0.com",
+  "domain": "auth.2025-se-tech-challenge.app",
   "clientId": "LcCO605j1aiI58zFEKETYZHNzhvUHEtO",
   "audience": "https://pizza42.api",
   "scope": "openid profile email create:orders offline_access",
