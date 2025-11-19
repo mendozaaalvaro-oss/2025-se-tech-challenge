@@ -78,7 +78,7 @@ class Content extends Component {
 
     try {
       const idTokenClaims = await auth0.getIdTokenClaims();
-      const emailVerified = idTokenClaims?.['https://pizza42/email_verified'];
+      const emailVerified = idTokenClaims?.email_verified;
 
       if (!emailVerified) {
         await refreshTokens(auth0);
