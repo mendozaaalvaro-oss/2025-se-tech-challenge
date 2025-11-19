@@ -32,7 +32,7 @@ Implementation references:
 - Orders stored as non-editable user metadata [`server-services/auth0API.js:52-63`](server-services/auth0API.js#L52-L63)
 and automatically updated when new orders placed [`api-server.js:46-68`](api-server.js#L46-L68)
 - Inject `app_metadata` into ID token [`auth0/Actions/AppMDtoCustomClaims.md`](auth0/Actions/AppMDtoCustomClaims.md)
-- Inject email_verified status into Access Token[`auth0/Actions/Email_Verified.md`](auth0/Actions/Email_Verified.md)
+- Inject `email_verified` status into Access Token[`auth0/Actions/Email_Verified.md`](auth0/Actions/Email_Verified.md)
 and the server validates this before allowing orders [`server-services/userValidation.js:15-27`](server-services/userValidation.js#L15-L27)
 
 ## Architecture Diagram
