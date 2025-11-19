@@ -7,7 +7,7 @@
 - Connect securely to existing databases via Auth0's Custom Database Scripts and migrate users automatically by enabling the Import Mode toggle on the connection [`auth0/dbScripts/`](auth0/dbScripts/)
 - Scope-based authorization (`create:orders`) controls access to the POST /api/orders endpoint using Auth0's `express-oauth2-jwt-bearer` package.
   -  Scopes are requested during authentication in [`src/index.js#L25`](src/index.js#L25) and enforced server-side via `requiredScopes()` in [`api-server.js#L75`](api-server.js#L75)
-- Verification email can be sent in-app for existing users with unverified emails [`src/components/Content.js:70-82`](src/components/Content.js#L70-L82)
+- Verification email can be sent in-app for existing users with unverified emails[`server-services/auth0API.js:65-78`](server-services/auth0API.js#L65-L78)
 
 ### 2. Frictionless & Customizable Login Experience
 
@@ -24,7 +24,7 @@ Implementation references:
 
 ### 3. Enrich Customer Data at Login
 
-- Store customer's order history in `app_metadata` (non-editable by the user)  
+- Store customer's order history in `app_metadata` (non-editable by the user)
 - Add order history to ID token claims
 - Email verification status is added to Access Token for server-side validation
 
@@ -65,7 +65,7 @@ Edit the [src/auth_config.json](src/auth_config.json) file and replace the place
   - Management API token is cached in server memory to avoid multiple token requests  
 - The information from the `app_metadata`is added to the ID token using Auth0 Actions.
 - Silent token refreshes run in the background without user interaction
-
+  
 After updating this file, start both the frontend and backend servers for the changes to take effect. Dockerfile is configured to run `yarn start`. 
 
 ## License
