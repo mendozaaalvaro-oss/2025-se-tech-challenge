@@ -7,24 +7,32 @@ export const ProfileComponent = ({ user, getAccessTokenSilently, getIdTokenClaim
   const [resetInfo, setResetInfo] = useState(null);
   const [resetError, setResetError] = useState(null);
   const [idToken, setIdToken] = useState(null);
+  const [accessToken, setAccessToken] = useState(null);
 
   const displayUser = user ? { ...user } : {};
   delete displayUser['https://pizza42/orders'];
 
   useEffect(() => {
-    const fetchIdToken = async () => {
+    const fetchTokens = async () => {
       try {
         const idTokenClaims = await getIdTokenClaims();
         setIdToken(idTokenClaims?.__raw);
       } catch (error) {
         console.error('Error fetching ID token:', error);
       }
+
+      try {
+        const token = await getAccessTokenSilently();
+        setAccessToken(token);
+      } catch (error) {
+        console.error('Error fetching access token:', error);
+      }
     };
 
     if (user) {
-      fetchIdToken();
+      fetchTokens();
     }
-  }, [user, getIdTokenClaims]);
+  }, [user, getIdTokenClaims, getAccessTokenSilently]);
 
   const handlePasswordReset = async () => {
     setResetting(true);
@@ -82,9 +90,34 @@ export const ProfileComponent = ({ user, getAccessTokenSilently, getIdTokenClaim
 
       <Row className="mt-4">
         <Col>
-          <h4 className="mb-3">ID Token</h4>
+          <h4 className="mb-3">
+            <a
+              href={`https://jwt.io/#token=${idToken || ''}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              ID Token
+            </a>
+          </h4>
           <pre className="rounded p-3 bg-light" style={{ fontSize: '0.75rem', maxHeight: '300px', overflow: 'auto' }}>
             <code>{idToken || 'Loading...'}</code>
+          </pre>
+        </Col>
+      </Row>
+
+      <Row className="mt-4">
+        <Col>
+          <h4 className="mb-3">
+            <a
+              href={`https://jwt.io/#token=${accessToken || ''}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Access Token
+            </a>
+          </h4>
+          <pre className="rounded p-3 bg-light" style={{ fontSize: '0.75rem', maxHeight: '300px', overflow: 'auto' }}>
+            <code>{accessToken || 'Loading...'}</code>
           </pre>
         </Col>
       </Row>
