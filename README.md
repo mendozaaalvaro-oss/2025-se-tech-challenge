@@ -4,10 +4,10 @@
 
 ### 1. Offload Credential Management
 
-- Connect securely to existing databases via Auth0's Custom Database Scripts and migrate users automatically by enabling the Import Mode toggle on the connection [`auth0/dbScripts/`](auth0/dbScripts/)
-- Scope-based authorization (`create:orders`) controls access to the POST /api/orders endpoint using Auth0's `express-oauth2-jwt-bearer` package.
+- Connect securely to external databases via Auth0's Custom Database Scripts and migrate users gradually by enabling the Import Mode toggle on the connection [`auth0/dbScripts/`](auth0/dbScripts/)
+- Scope-based authorization (`create:orders`) controls access to making orders using Auth0's `express-oauth2-jwt-bearer` package.
   -  Scopes are requested during authentication in [`src/index.js#L25`](src/index.js#L25) and enforced server-side via `requiredScopes()` in [`api-server.js#L75`](api-server.js#L75)
-- Verification email can be sent in-app for existing users with unverified emails[`server-services/auth0API.js:65-78`](server-services/auth0API.js#L65-L78)
+- Verification email can be sent in-app for users from external database with unverified emails[`server-services/auth0API.js:65-78`](server-services/auth0API.js#L65-L78)
 
 ### 2. Frictionless & Customizable Login Experience
 
@@ -41,9 +41,7 @@ and the server validates this before allowing orders [`server-services/userValid
 
 ## Configuration Guide
 
-To configure this application with your Auth0 tenant, update the configuration file with your credentials.
-
-Edit the [src/auth_config.json](src/auth_config.json) file and replace the placeholder values with your Auth0 information:
+To configure this application with your Auth0 tenant, edit the [src/auth_config.json](src/auth_config.json) file and replace the placeholder values with your Auth0 information:
 
 - `domain`: Your Auth0 tenant custom domain
 - `canonical_domain`: Your Auth0 tenant canonical domain (needed as the audience for client credential flows)
@@ -51,9 +49,11 @@ Edit the [src/auth_config.json](src/auth_config.json) file and replace the place
 - `audience`: Your API identifier for your API server
 - `managementClientId`: Auth0 Management API client ID (M2M Application)
 - `managementClientSecret`: Auth0 Management API client secret (M2M Application)
-- `connection`: The name of your Auth0 database connection
+- `connection`: The name of your Auth0 external database connection
 - `serverAPI`: Backend API URL
 - `appOrigin`: Frontend application URL
+
+After updating this file, start both the frontend and backend servers. Dockerfile is configured to start both servers using `yarn start`. 
 
 ## How It Works
 
@@ -65,8 +65,6 @@ Edit the [src/auth_config.json](src/auth_config.json) file and replace the place
   - Management API token is cached in server memory to avoid multiple token requests  
 - The information from the `app_metadata`is added to the ID token using Auth0 Actions.
 - Silent token refreshes run in the background without user interaction
-  
-After updating this file, start both the frontend and backend servers for the changes to take effect. Dockerfile is configured to run `yarn start`. 
 
 ## License
 
