@@ -8,13 +8,13 @@ const getManagementAccessToken = async (event, api) => {
   const authentication = new AuthenticationClient({
     domain: event.secrets.DOMAIN,
     clientId: event.secrets.CLIENT_ID,
-    clientSecret: event.secrets.CLIENT_SECRET,
+    clientSecret: event.secrets.CLIENT_SECRET
   });
 
   const {
     data: { access_token, expires_in },
   } = await authentication.oauth.clientCredentialsGrant({
-    audience: `https://${event.secrets.DOMAIN}/api/v2/`,
+    audience: `https://${event.secrets.CANONICAL_DOMAIN}/api/v2/`,
   });
 
   api.cache.set(mgtToken, access_token, { ttl: expires_in });
@@ -26,15 +26,15 @@ const getManagementClient = async (event, api) => {
   const token = await getManagementAccessToken(event, api);
   return new ManagementClient({
     domain: event.secrets.DOMAIN,
-    token,
+    token
   });
 };
 
-const connections = ['email', 'sms'];
+const connection = 'email';
 
 exports.onExecutePostLogin = async (event, api) => {
   const strategy = event.connection.strategy;
-  if (!connections.includes(strategy)) return;
+  if (!connection.includes(strategy)) return;
 
   if (event.user.app_metadata?.pwdless_linked) {
     console.log('Account linking already completed for this user');
@@ -42,8 +42,8 @@ exports.onExecutePostLogin = async (event, api) => {
   }
 
   const email = event.user.email;
-  if (!email) return;
-  if (!event.user.email_verified) return;
+  // if (!email) return;
+  // if (!event.user.email_verified) return;
 
   try {
     const management = await getManagementClient(event, api);
@@ -51,8 +51,7 @@ exports.onExecutePostLogin = async (event, api) => {
     let users;
     try {
       const result = await management.users.list({
-        q: `email:"${email}"`,
-        searchEngine: 'v3',
+        u: `email:"${email}"`
       });
 
       users = Array.isArray(result) ? result : result?.data || [];
@@ -91,15 +90,11 @@ exports.onExecutePostLogin = async (event, api) => {
         const secondaryOrders = event.user.app_metadata?.orders || [];
         const primaryOrders = primaryUser.app_metadata?.orders || [];
 
-        console.log('Secondary orders:', secondaryOrders);
-        console.log('Primary orders:', primaryOrders);
-
         const mergedOrders = [...primaryOrders, ...secondaryOrders];
-        console.log('Merged orders:', mergedOrders);
 
         const updatedAppMetadata = {
-          pwdless_linked: true,
-          orders: mergedOrders
+          orders: mergedOrders,
+          pwdless_linked: true
         };
 
         await management.users.update(
